@@ -38,6 +38,10 @@ class authenticationController extends authentication
 		}
 		$reqvars = Context::getRequestVars();
 
+		debugPrint('check-1');
+		debugPrint(Context::get('logged_info'));
+		debugPrint($reqvars);
+
 		// check duplicated.
 		if($config->number_overlap == 'N' && $target_action == 'dispMemberSignUpForm')
 		{		 
@@ -45,6 +49,32 @@ class authenticationController extends authentication
 			$output = executeQuery('authentication.getAuthenticationMemberCountByClue', $args);
 			if(!$output->toBool()) return $output;
 			if($output->data->count > 0) return new Object(-1, '가입하신 휴대폰 번호로 중복 가입이 불가능합니다.');
+		}
+
+		/**
+		 * 회원수정시 중복번호 검사
+		 */
+		if($config->number_overlap == 'N' && $target_action == 'dispMemberModifyInfo')
+		{
+			$logged_info = Context::get('logged_info');
+			$args->member_srl = $logged_info->member_srl;
+			$output = executeQuery('authentication.getAuthenticationMember', $args);
+			if(!$output->toBool()) return $output;
+
+			$clue = $output->data->clue;
+			if(!$output->data) $clue = "";
+
+			/**
+			 * 저장된 번호와 입력받은 번호가 다르다면 중복번호 검사를 한다.
+			 */
+			if($clue != $phonenum)
+			{
+				$args->clue = $phonenum;
+				$output = executeQuery('authentication.getAuthenticationMemberCountByClue', $args);
+				if(!$output->toBool()) return $output;
+				if($output->data->count > 0) return new Object(-1, '이미 가입된 휴대폰 번호 입니다.');
+			}
+			unset($args);
 		}
 
 		$trigger_output = ModuleHandler::triggerCall ('authentication.procAuthenticationSendAuthCode', 'before', $reqvars);
@@ -252,10 +282,13 @@ class authenticationController extends authentication
 	 */
 	function triggerMemberInsert(&$in_args)
 	{
+		debugPrint("check-5");
+		debugPRint($_SESSION['authentication_srl']);
 		if($_SESSION['authentication_srl'])
 		{
 			$args->authentication_srl = $_SESSION['authentication_srl'];
 			$output = executeQuery('authentication.getAuthentication', $args);
+			debugPrint($output);
 			if(!$output->toBool()) return $output;
 			$authinfo = $output->data;
 
@@ -287,15 +320,6 @@ class authenticationController extends authentication
 			$args->member_srl = $in_args->member_srl;
 			$args->clue = $authinfo->clue;
 			$args->country_code = $authinfo->country_code;
-
-			/*
-			if($authentication_config->cellphone_fieldname){
-				$field_name = $authentication_config->cellphone_fieldname;
-				$field_array = unserialize($in_args->extra_vars)->$field_name;
-
-				$args->clue = $field_array[0].$field_array[1].$field_array[2];
-			}
-			*/
 
 			$output = executeQuery('authentication.deleteAuthenticationMember', $args);
 			if(!$output->toBool()) return $output;

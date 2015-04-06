@@ -19,6 +19,7 @@ class authenticationController extends authentication
 	function procAuthenticationSendAuthCode()
 	{
 		$oAuthenticationModel = &getModel('authentication');
+		$oMemberModel = &getModel('member');
 		$config = $oAuthenticationModel->getModuleConfig();
 		$target_action = Context::get('target_action');
 
@@ -38,17 +39,26 @@ class authenticationController extends authentication
 		}
 		$reqvars = Context::getRequestVars();
 
-		debugPrint('check-1');
-		debugPrint(Context::get('logged_info'));
-		debugPrint($reqvars);
-
 		// check duplicated.
 		if($config->number_overlap == 'N' && $target_action == 'dispMemberSignUpForm')
 		{		 
 			$args->clue = $phonenum;
 			$output = executeQuery('authentication.getAuthenticationMemberCountByClue', $args);
 			if(!$output->toBool()) return $output;
-			if($output->data->count > 0) return new Object(-1, '가입하신 휴대폰 번호로 중복 가입이 불가능합니다.');
+
+			/**
+			 * 중복검사시 회원 탈퇴유무도 검색한다.
+			 */
+			if($output->data->count > 0)
+			{
+				$output = executeQueryArray('authentication.getAuthenticationMemberByClue', $args);
+
+				foreach($output->data as $k => $v)
+				{
+					$member_info = $oMemberModel->getMemberInfoByMemberSrl($v->member_srl);
+					if($member_info) return new Object(-1, '가입하신 휴대폰 번호로 중복 가입이 불가능합니다.');
+				}
+			}
 		}
 
 		/**
@@ -72,7 +82,20 @@ class authenticationController extends authentication
 				$args->clue = $phonenum;
 				$output = executeQuery('authentication.getAuthenticationMemberCountByClue', $args);
 				if(!$output->toBool()) return $output;
-				if($output->data->count > 0) return new Object(-1, '이미 가입된 휴대폰 번호 입니다.');
+
+				/**
+				 * 중복검사시 회원 탈퇴유무도 검색한다.
+				 */
+				if($output->data->count > 0)
+				{
+					$output = executeQueryArray('authentication.getAuthenticationMemberByClue', $args);
+
+					foreach($output->data as $k => $v)
+					{
+						$member_info = $oMemberModel->getMemberInfoByMemberSrl($v->member_srl);
+						if($member_info) return new Object(-1, '가입하신 휴대폰 번호로 중복 가입이 불가능합니다.');
+					}
+				}
 			}
 			unset($args);
 		}
@@ -282,13 +305,10 @@ class authenticationController extends authentication
 	 */
 	function triggerMemberInsert(&$in_args)
 	{
-		debugPrint("check-5");
-		debugPRint($_SESSION['authentication_srl']);
 		if($_SESSION['authentication_srl'])
 		{
 			$args->authentication_srl = $_SESSION['authentication_srl'];
 			$output = executeQuery('authentication.getAuthentication', $args);
-			debugPrint($output);
 			if(!$output->toBool()) return $output;
 			$authinfo = $output->data;
 

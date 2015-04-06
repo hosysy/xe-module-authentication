@@ -52,7 +52,6 @@ class authenticationModel extends authentication
 	{
 		$args->clue = $clue;
 		$output = executeQueryArray('authentication.getAuthenticationMemberListByClue', $args);
-		debugPrint($output);
 		if(!$output->toBool()) return;
 		return $output->data;
 	}

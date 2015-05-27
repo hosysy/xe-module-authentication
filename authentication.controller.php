@@ -290,6 +290,13 @@ class authenticationController extends authentication
 
 		$action_list = array_filter(explode(',',$config->list));
 
+		// 관리자가 회원추가를 할 경우 이 루틴을 패스한다.
+		if(Context::get('logged_info'))
+		{
+			$logged_info = Context::get('logged_info');
+			if($logged_info->is_admin == 'Y') return new Object();
+		}
+
 		if(!in_array("dispMemberSignUpForm", $action_list)) return new Object();
 
 		if($_SESSION['authentication_pass'] != 'Y')

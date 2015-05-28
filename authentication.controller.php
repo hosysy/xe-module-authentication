@@ -355,6 +355,17 @@ class authenticationController extends authentication
 			if(!$output->toBool()) return $output;
 		}
 	}
+
+	/**
+	 * 멤버 탈퇴/삭제시 인증받은 회원 제거
+	 */
+	function triggerMemberDelete(&$in_args)
+	{
+		if(!$in_args->member_srl) return new Object(-1, 'msg_invalid_request');
+		$args->member_srl = $in_args->member_srl;
+		$output = executeQuery('authentication.deleteAuthenticationMember', $args);
+		if(!$output->toBool()) return $output;
+	}
 }
 /* End of file authentication.controller.php */
 /* Location: ./modules/authentication/authentication.controller.php */

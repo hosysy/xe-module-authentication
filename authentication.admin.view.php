@@ -138,6 +138,7 @@ class authenticationAdminView extends authentication
 
 	function dispAuthenticationAdminMemberList() 
 	{
+		global $lang;
 		$args->page = Context::get('page');
 		$search_key = Context::get('search_key');
 		if($search_key)
@@ -158,7 +159,13 @@ class authenticationAdminView extends authentication
 
 		$output = executeQuery('authentication.getAuthenticationMemberList',$args);
 		if(!$output->toBool()) return $output;
-		Context::set('list', $output->data);
+
+		$list = $output->data;
+		foreach($list as $key => $val)
+		{
+			$val->country = $lang->country_codes[$val->country_code];
+		}
+		Context::set('list', $list);
 		Context::set('total_count', $output->total_count);
 		Context::set('total_page', $output->total_page);
 		Context::set('page', $output->page);

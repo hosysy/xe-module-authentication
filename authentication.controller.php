@@ -100,7 +100,7 @@ class authenticationController extends authentication
 			unset($args);
 		}
 
-		$trigger_output = ModuleHandler::triggerCall ('authentication.procAuthenticationSendAuthCode', 'before', $reqvars);
+		$trigger_output = ModuleHandler::triggerCall('authentication.procAuthenticationSendAuthCode', 'before', $reqvars);
 		if(!$trigger_output->toBool ()) return $trigger_output;
 
 		// generate auth-code
@@ -132,7 +132,7 @@ class authenticationController extends authentication
 
 		// save auth info
 		$args->authentication_srl = getNextSequence();
-		$args->country = $country_code;
+		$args->country_code = $country_code;
 		$args->clue = $phonenum;
 		$args->authcode = $keystr;
 		$args->ipaddress = $_SERVER['REMOTE_ADDR'];

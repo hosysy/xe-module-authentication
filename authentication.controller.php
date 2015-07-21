@@ -155,6 +155,7 @@ class authenticationController extends authentication
 			$args->content = $keystr;
 		}
 		//$args->encode_utf16 = $encode_utf16; 
+		$args->country = $country_code;
 		$controller = &getController('textmessage');
 
 		$output = $controller->sendMessage($args);

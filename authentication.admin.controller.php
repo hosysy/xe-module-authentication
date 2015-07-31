@@ -80,6 +80,16 @@ class authenticationAdminController extends authentication
 			executeQuery('authentication.insertAuthenticationMember', $args);
 		}
 	}
+
+	/**
+	 * @breif 인증받은 회원 정보 변경
+	 */
+	function setAuthenticationMemberUpdate($args)
+	{
+		if(!$args->member_srl) return new Object(-1, 'member_srl is empty');
+		$output = executeQuery('authentication.updateAuthenticationMember', $args);
+		return $output;
+	}
 }
 /* End of file authentication.admin.controller.php */
 /* Location: ./modules/authentication/authentication.admin.controller.php */

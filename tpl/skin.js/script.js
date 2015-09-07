@@ -14,7 +14,7 @@ function getAuthCode(target_action)
 
 	if(accept_agreement == null) 
 	{
-		alert("약관동의 값은 필수입니다.");
+		alert("개인정보수집에 동의해 주세요.");
 		return;
 	}
 

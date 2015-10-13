@@ -1,12 +1,14 @@
 <?php
 /**
- * vi:set sw=4 ts=4 noexpandtab fileencoding=utf8:
  * @class  authenticationController
  * @author NURIGO(contact@nurigo.net)
  * @brief  authenticationController
  */
 class authenticationController extends authentication 
 {
+	/**
+	 * @brief 인증을위한 랜덤번호 추출
+	 */
 	function getRandNumber($e)
 	{
 		for($i=0;$i<$e;$i++)
@@ -16,6 +18,9 @@ class authenticationController extends authentication
 		return $rand;
 	}
 
+	/**
+	 * @brief 인증번호 발송
+	 */
 	function procAuthenticationSendAuthCode()
 	{
 		$oAuthenticationModel = &getModel('authentication');
@@ -173,6 +178,9 @@ class authenticationController extends authentication
 		$this->setMessage('인증번호를 발송하였습니다.');
 	}
 
+	/**
+	 * @brief 인증번호 비교
+	 */
 	function procAuthenticationVerifyAuthCode()
 	{
 		$reqvars = Context::getRequestVars();
@@ -209,6 +217,9 @@ class authenticationController extends authentication
 		}
 	}
 
+	/**
+	 * @brief 인증번호 전송상태를 가져온다
+	 */
 	function procAuthenticationUpdateStatus() 
 	{
 		$oTextmessageModel = &getModel('textmessage');
@@ -221,24 +232,44 @@ class authenticationController extends authentication
 		$this->add('result', $result);
 	}
 
+	/**
+	 * @brief 인증방법에 따른 인증 시작
+	 */
 	function startAuthentication(&$oModule)
 	{
 		$oAuthenticationModel = &getModel('authentication');
+		$oLayoutModel = &getModel('layout');
 		$config = $oAuthenticationModel->getModuleConfig();
 		$config->agreement = $oAuthenticationModel->_getAgreement();
-		if(Mobile::isFromMobilePhone())
+		Context::set('config', $config);
+
+		// KCB 본인인증일 경우
+		if($config->authentication_type == 'kcb') 
 		{
-			$oModule->setTemplatePath(sprintf($this->module_path.'m.skins/%s/', $config->mskin));
-		}
-		else
-		{
+			$layout_info = $oLayoutModel->getLayout($config->layout_srl);
+			if($layout_info)
+			{
+				$oModule->setLayoutPath($layout_info->path);
+				$oModule->setLayoutFile("layout");
+			}
+			$result_code = $oAuthenticationModel->getKcbMobileData();
+			if($result_code != '000')
+			{
+				$error_message = $oAuthenticationModel->getKcbMobileError($result_code);
+				return new Object(-1, $error_message);
+			}
+
+			Context::set('next_act', $oModule->act);
 			$oModule->setTemplatePath(sprintf($this->module_path.'skins/%s/', $config->skin));
+			$oModule->setTemplateFile('kcb_index');
+			return new Object();
 		}
 
-		if($config->authcode_time_limit)
-		{
-			Context::set('time_limit', $config->authcode_time_limit);
-		}
+		// 기존의 휴대폰 인증일경우
+		$oModule->setTemplatePath(sprintf($this->module_path.'skins/%s/', $config->skin));
+		if(Mobile::isFromMobilePhone()) $oModule->setTemplatePath(sprintf($this->module_path.'m.skins/%s/', $config->mskin));
+
+		if($config->authcode_time_limit) Context::set('time_limit', $config->authcode_time_limit);
 
 		// 전송지연 현황 보여주기 
 		$status = $oAuthenticationModel->getDelayStatus();
@@ -251,22 +282,14 @@ class authenticationController extends authentication
 		}
 
 		Context::set('number_limit', $config->number_limit);
-		Context::set('config', $config);
-		Context::set('target_action', $oModule->act);
-
-		$oLayoutModel = &getModel('layout');
-		$layout_info = $oLayoutModel->getLayout($config->layout_srl);
-		if($layout_info)
-		{
-			$oModule->setLayoutPath($layout_info->path);
-			$oModule->setLayoutFile("layout");
-		}
+		$oModule->setTemplatePath(sprintf($this->module_path.'skins/%s/', $config->skin));
 		$oModule->setTemplateFile('index');
+		return new Object();
 	}
 
 	/**
 	 * @brief 모듈핸들러 실행 후 트리거 (애드온의 after_module_proc에 대응)
-	 **/
+	 */
 	function triggerModuleHandlerProc(&$oModule)
 	{
 		$oAuthenticationModel = &getModel('authentication');
@@ -276,13 +299,14 @@ class authenticationController extends authentication
 
 		if(in_array(Context::get('act'), $action_list) && $_SESSION['authentication_pass'] != 'Y')
 		{
-			$this->startAuthentication($oModule);
+			$output = $this->startAuthentication($oModule);
+			if(!$output->toBool()) return $output;
 		}
 		return new Object();
 	}
 
-	/*
-	 * 외부페이지에서 직접 procMemberInsert를 호출하지 못하게 막는다. 
+	/**
+	 * @brief 외부페이지에서 직접 procMemberInsert를 호출하지 못하게 막는다. 
 	 */
 	function triggerMemberInsertBefore(&$in_args)
 	{
@@ -308,8 +332,8 @@ class authenticationController extends authentication
 		return new Object();
 	}
 
-	/*
-	 * 회원가입후 member_srl과 인증정보들을 authentication_member table에 넣는다.
+	/**
+	 * @brief 회원가입후 member_srl과 인증정보들을 authentication_member table에 넣는다.
 	 */
 	function triggerMemberInsert(&$in_args)
 	{
@@ -330,7 +354,7 @@ class authenticationController extends authentication
 	}
 
 	/**
-	 * this function will be triggered by member module after module.updateMember called.
+	 * @brief this function will be triggered by member module after module.updateMember called.
 	 */
 	function triggerMemberUpdate(&$in_args)
 	{
@@ -358,7 +382,7 @@ class authenticationController extends authentication
 	}
 
 	/**
-	 * 멤버 탈퇴/삭제시 인증받은 회원 제거
+	 * @brief 멤버 탈퇴/삭제시 인증받은 회원 제거
 	 */
 	function triggerMemberDelete(&$in_args)
 	{

@@ -1,6 +1,5 @@
 <?php
 /**
- * vi:set sw=4 ts=4 noexpandtab fileencoding=utf8:
  * @class  authentication
  * @author NURIGO(contact@nurigo.net)
  * @brief  authentication
@@ -25,6 +24,9 @@ class authentication extends ModuleObject
 		return $text;
 	}
 
+	/**
+	 * @brief 트리거 등록
+	 */
 	function registerTriggers()
 	{
 		$oModuleController = &getController('module');

@@ -1,8 +1,7 @@
 <?php
 /**
- * vi:set sw=4 ts=4 noexpandtab fileencoding=utf8:
  * @class  authenticationAdminController
- * @author wiley(wiley@nurigo.net)
+ * @author NURIGO(contact@nurigo.net)
  * @brief  authenticationAdminController
  */
 class authenticationAdminController extends authentication 
@@ -14,10 +13,12 @@ class authenticationAdminController extends authentication
 	{
 	}
 
+	/**
+	 * @breif kcb error_code를 string으로 변환해서 돌려준다.
+	 */
 	function procAuthenticationAdminConfig()
 	{
 		$args = Context::getRequestVars();
-
 		if(!trim(strip_tags($args->agreement)))
 		{
 			$agreement_file = _XE_PATH_.'files/authentication/agreement_' . Context::get('lang_type') . '.txt';
@@ -49,6 +50,9 @@ class authenticationAdminController extends authentication
 		$this->setRedirectUrl($redirectUrl);
 	}
 
+	/**
+	 * @brief 인증모듈 디자인 설정 저장
+	 */
 	function procAuthenticationAdminDesignConfig()
 	{
 		$args = Context::getRequestVars();
@@ -62,23 +66,6 @@ class authenticationAdminController extends authentication
 
 		$redirectUrl = getNotEncodedUrl('', 'module', 'admin', 'act', 'dispAuthenticationAdminDesign');
 		$this->setRedirectUrl($redirectUrl);
-	}
-
-	function procAuthenticationAdminMigrateFromMXE()
-	{
-		$oMemberModel = &getModel('member');
-		$output = executeQueryArray('authentication.getMXEAllMappingData');
-		if(!$output->toBool()) return $output;
-		foreach($output->data as $key=>$val)
-		{
-			$member_info = $oMemberModel->getMemberInfoByUserID($val->user_id);
-			$args->authentication_srl = 0;
-			$args->member_srl = $member_info->member_srl;
-			$args->clue = $val->phone_num;
-			$args->country_code = $val->country;
-			$args->authcode = '01234';
-			executeQuery('authentication.insertAuthenticationMember', $args);
-		}
 	}
 
 	/**

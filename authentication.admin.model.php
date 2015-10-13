@@ -1,12 +1,14 @@
 <?php
 /**
- * vi:set sw=4 ts=4 noexpandtab fileencoding=utf8:
  * @class  authenticationAdminModel
- * @author diver(diver@coolsms.co.kr)
+ * @author NURIGO(contact@nurigo.net)
  * @brief  authenticationAdminModel
  */
 class authenticationAdminModel extends authentication 
 {
+	/**
+	 * @brief 회원의 인증번호 가져오기
+	 */
 	function getAuthenticationAdminNumber()
 	{
 		$args->member_srl = Context::get('target_srl');

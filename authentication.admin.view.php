@@ -1,12 +1,14 @@
 <?php
 /**
- * vi:set sw=4 ts=4 noexpandtab fileencoding=utf8:
  * @class  authenticationAdminView
  * @author NURIGO(contact@nurigo.net)
  * @brief  authenticationAdminView
  */ 
 class authenticationAdminView extends authentication 
 {
+	/**
+	 * @brief constructor
+	 */
 	function init() 
 	{
 		// 템플릿 설정
@@ -14,7 +16,7 @@ class authenticationAdminView extends authentication
 	}
 
 	/**
-	 * config
+	 * @breif 환경설정페이지 
 	 */
 	function dispAuthenticationAdminConfig() 
 	{
@@ -27,7 +29,6 @@ class authenticationAdminView extends authentication
 
 		$config = $oAuthenticationModel->getModuleConfig();
 		$config->agreement = $oAuthenticationModel->_getAgreement();
-		
 		Context::set('config', $config);
 
 		// Get a layout list
@@ -77,8 +78,8 @@ class authenticationAdminView extends authentication
 	}
 
 
-	/*
-	 * design setup
+	/**
+	 * @breif 디자인설정 페이지
 	 */
 	function dispAuthenticationAdminDesign()
 	{
@@ -107,6 +108,9 @@ class authenticationAdminView extends authentication
 	}
 
 
+	/**
+	 * @breif 인증모듈 사용현황 페이지
+	 */
 	function dispAuthenticationAdminAuthcodeList() 
 	{
 		$args->page = Context::get('page');
@@ -136,6 +140,9 @@ class authenticationAdminView extends authentication
 		$this->setTemplateFile('authcode_list');
 	}
 
+	/**
+	 * @breif 인증받은 회원 리스트
+	 */
 	function dispAuthenticationAdminMemberList() 
 	{
 		global $lang;
@@ -174,6 +181,9 @@ class authenticationAdminView extends authentication
 		$this->setTemplateFile('memberlist');
 	}
 
+	/**
+	 * @breif 인증받은 회원목록을 .xls파일로 다운받는다.
+	 */
 	function dispAuthenticationAdminXLSDownload() 
 	{
 		$args->list_count = 999999;

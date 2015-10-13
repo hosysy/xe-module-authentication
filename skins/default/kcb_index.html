@@ -1,0 +1,36 @@
+<load target="../../tpl/skin.js/kcb.js" />
+
+<div cond="$XE_VALIDATOR_MESSAGE" class="message {$XE_VALIDATOR_MESSAGE_TYPE}">
+	<p>{$XE_VALIDATOR_MESSAGE}</p>
+</div>
+<section>
+	<h1>개인정보수집약관</h1>
+	<block>
+		<hr />
+		<div class="agreement">
+			{$config->agreement}
+		</div> 
+		<hr />
+		<label class="checkbox">
+			<input type="checkbox" id="accept_agreement"> {$lang->about_accept_agreement}
+		</label>
+	</block>
+</section>
+
+<section>
+	<div class="login-footer">
+		<a href="#AuthArea" id="aaa" class="btn" title="휴대폰 안심본인인증" onClick="return checkAgree('jsSubmit');">휴대폰으로 본인인증</a>
+	</div>
+	
+	<form name="auth_frm" method="post">
+		<input type="hidden" name="tc" value="kcb.oknm.online.safehscert.popup.cmd.P901_CertChoiceCmd">
+		<input type="hidden" name="rqst_data" id="rqst_data"	value="{$rqst_data}" />
+		<input type="hidden" name="target_id"	value="" />
+	</form>
+
+	<form name="next_act" id="next_act" method="get" action="./" style="text-align:center;">
+		<input type="hidden" name="error_return_url" value="" />
+		<input type="hidden" name="mid" value="{$mid}" />
+		<input type="hidden" name="act" value="{$next_act}" />
+	</form>
+</section>

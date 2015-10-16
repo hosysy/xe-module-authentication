@@ -37,8 +37,7 @@ class authenticationView extends authentication
 		if(preg_match('~[^0-9a-zA-Z+/=]~', $WEBPUBKEY, $match)) return $this->stop('check_parameater');
 		if(preg_match('~[^0-9a-zA-Z+/=]~', $WEBSIGNATURE, $match)) return $this->stop('check_parameater');
 
-		$memId = "V20650000000"; // KCB로부터 부여받은 회원사코드 설정 (12자리)
-		//$exe = $this->xiConfig->kcb->module_file;
+		$memId = $config->kcb_id; // KCB로부터 부여받은 회원사코드 설정 (12자리)
 		$keyPath = "./safecert_$memId.key";
 		$logPath = "./files/authentication/logs";
 		$endPointUrl = "http://safe.ok-name.co.kr/KcbWebService/OkNameService";// 운영 서버

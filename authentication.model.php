@@ -103,6 +103,10 @@ class authenticationModel extends authentication
 	 */
 	function getContent()
 	{
+		$oAuthenticationModel = &getModel('authentication');
+		$config = $oAuthenticationModel->getModuleConfig();
+		Context::set('config', $config);
+
 		$tpl_path = sprintf('%sskins/default/', $this->module_path);
 		$tpl_file = 'index.html';
 
